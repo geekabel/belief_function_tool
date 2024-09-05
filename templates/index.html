@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belief Function Analysis Tool</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Belief Function Analysis Tool</h1>
+    <form id="analyzeForm">
+        <label for="m1">m1 (JSON format):</label><br>
+        <textarea id="m1" name="m1" rows="4" cols="50">{"A": 0.4, "B": 0.3, "AB": 0.3}</textarea><br>
+        <label for="m2">m2 (JSON format):</label><br>
+        <textarea id="m2" name="m2" rows="4" cols="50">{"A": 0.5, "C": 0.3, "AC": 0.2}</textarea><br>
+        <label for="rule">Rule:</label>
+        <select id="rule" name="rule">
+            <option value="Dempster">Dempster</option>
+            <option value="Yager">Yager</option>
+            <option value="Dubois_Prade">Dubois-Prade</option>
+            <option value="PCR5">PCR5</option>
+            <option value="PCR6">PCR6</option>
+        </select><br>
+        <input type="submit" value="Analyze">
+    </form>
+    <div id="result"></div>
+    <div id="sensitivityPlot"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#analyzeForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/analyze',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        m1: JSON.parse($('#m1').val()),
+                        m2: JSON.parse($('#m2').val()),
+                        rule: $('#rule').val()
+                    }),
+                    success: function(response) {
+                        $('#result').html('<h2>Result:</h2><pre>' + JSON.stringify(response.result, null, 2) + '</pre>');
+                        
+                        var traces = [];
+                        for (var key in response.sensitivity) {
+                            traces.push({
+                                y: response.sensitivity[key],
+                                type: 'box',
+                                name: key
+                            });
+                        }
+                        
+                        Plotly.newPlot('sensitivityPlot', traces, {
+                            title: 'Sensitivity Analysis',
+                            yaxis: {title: 'Mass'},
+                            boxmode: 'group'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
