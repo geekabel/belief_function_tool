@@ -190,120 +190,154 @@ class BeliefFunctionTool:
         return details
 
     def _get_dempster_details(self, *mass_functions):
-        details = ""
+        details = "Details for Dempster Rule:\n\n"
+        details += "1. Calculate the conflict mass (k) and normalized masses:\n\n"
         result = {}
         k = 0
         
-        for combination in self._generate_combinations(*mass_functions):
+        combinations = list(itertools.product(*[m.keys() for m in mass_functions]))
+        for combination in combinations:
             intersection = ''.join(sorted(set.intersection(*map(set, combination))))
             product = np.prod([m[f] for m, f in zip(mass_functions, combination)])
             
             if intersection:
                 result[intersection] = result.get(intersection, 0) + product
-                details += f"{' ∩ '.join(combination)} = {intersection}, mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: {intersection}\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {intersection}\n\n"
             else:
                 k += product
-                details += f"{' ∩ '.join(combination)} = ∅, conflict mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: ∅ (Conflict)\n"
+                details += f"     Conflict mass added to k: {product:.4f}\n\n"
         
-        details += f"\nTotal conflict (k): {k:.4f}\n"
-        details += "Normalization factor: 1 / (1 - k) = {:.4f}\n\n".format(1 / (1 - k))
-        
+        details += f"2. Total conflict mass (k): {k:.4f}\n\n"
+        details += f"3. Normalization factor: 1 / (1 - k) = {1 / (1 - k):.4f}\n\n"
+        details += "4. Normalize the masses:\n\n"
+        normalization_factor = 1 / (1 - k)
         for A in result:
-            result[A] /= (1 - k)
-            details += f"Normalized mass for {A}: {result[A]:.4f}\n"
+            normalized_mass = result[A] / normalization_factor
+            details += f"   - {A}: {normalized_mass:.4f}\n"
         
         return details
 
     def _get_yager_details(self, *mass_functions):
-        details = ""
+        details = f"Details for (Yager) Rule:\n\n"
         result = {}
         
-        for combination in self._generate_combinations(*mass_functions):
+        combinations = list(itertools.product(*[m.keys() for m in mass_functions]))
+        for combination in combinations:
             intersection = ''.join(sorted(set.intersection(*map(set, combination))))
             product = np.prod([m[f] for m, f in zip(mass_functions, combination)])
             
             if intersection:
                 result[intersection] = result.get(intersection, 0) + product
-                details += f"{' ∩ '.join(combination)} = {intersection}, mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: {intersection}\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {intersection}\n\n"
             else:
                 result['Ω'] = result.get('Ω', 0) + product
-                details += f"{' ∩ '.join(combination)} = ∅, mass added to Ω = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: ∅ (Conflict)\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to Ω\n\n"
         
-        details += "\nFinal mass assignments:\n"
+        details += "5. Final mass assignments:\n\n"
         for A in result:
-            details += f"m({A}) = {result[A]:.4f}\n"
+            details += f"   - {A}: {result[A]:.4f}\n"
         
         return details
 
     def _get_dubois_prade_details(self, *mass_functions):
-        details = ""
+        details = f"Details for Dubois-Prade Rule:\n\n"
         result = {}
         
-        for combination in self._generate_combinations(*mass_functions):
+        combinations = list(itertools.product(*[m.keys() for m in mass_functions]))
+        for combination in combinations:
             intersection = ''.join(sorted(set.intersection(*map(set, combination))))
             union = ''.join(sorted(set.union(*map(set, combination))))
             product = np.prod([m[f] for m, f in zip(mass_functions, combination)])
             
             if intersection:
                 result[intersection] = result.get(intersection, 0) + product
-                details += f"{' ∩ '.join(combination)} = {intersection}, mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: {intersection}\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {intersection}\n\n"
             else:
                 result[union] = result.get(union, 0) + product
-                details += f"{' ∩ '.join(combination)} = ∅, mass added to {union} = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: ∅ (Conflict)\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {union}\n\n"
         
-        details += "\nFinal mass assignments:\n"
+        details += "6. Final mass assignments:\n\n"
         for A in result:
-            details += f"m({A}) = {result[A]:.4f}\n"
+            details += f"   - {A}: {result[A]:.4f}\n"
         
         return details
 
     def _get_pcr5_details(self, *mass_functions):
-        details = ""
+        details = f"Details for PCR5 Rule:\n\n"
         result = {}
         
-        for combination in self._generate_combinations(*mass_functions):
+        combinations = list(itertools.product(*[m.keys() for m in mass_functions]))
+        for combination in combinations:
             intersection = ''.join(sorted(set.intersection(*map(set, combination))))
             product = np.prod([m[f] for m, f in zip(mass_functions, combination)])
             
             if intersection:
                 result[intersection] = result.get(intersection, 0) + product
-                details += f"{' ∩ '.join(combination)} = {intersection}, mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: {intersection}\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {intersection}\n\n"
             else:
-                details += f"{' ∩ '.join(combination)} = ∅, redistributing mass:\n"
-                factor = sum(m[f] for m, f in zip(mass_functions, combination))
+                total = sum(m[f] for m, f in zip(mass_functions, combination))
                 for m, f in zip(mass_functions, combination):
-                    proportional_mass = (m[f]**2 * product) / factor
+                    proportional_mass = (m[f]**2 * product) / total
                     result[f] = result.get(f, 0) + proportional_mass
-                    details += f"  m({f}) += {proportional_mass:.4f}\n"
+                    details += f"   - Combination: {combination}\n"
+                    details += f"     Intersection: ∅ (Conflict)\n"
+                    details += f"     Proportional mass for {f}: {proportional_mass:.4f}\n"
+                    details += f"     Added to {f}\n\n"
         
-        details += "\nFinal mass assignments:\n"
+        details += "7. Final mass assignments:\n\n"
         for A in result:
-            details += f"m({A}) = {result[A]:.4f}\n"
+            details += f"   - {A}: {result[A]:.4f}\n"
         
         return details
 
     def _get_pcr6_details(self, *mass_functions):
-        details = ""
+        details = f"Details for PCR6 Rule:\n\n"
         result = {}
         
-        for combination in self._generate_combinations(*mass_functions):
+        combinations = list(itertools.product(*[m.keys() for m in mass_functions]))
+        for combination in combinations:
             intersection = ''.join(sorted(set.intersection(*map(set, combination))))
             product = np.prod([m[f] for m, f in zip(mass_functions, combination)])
             
             if intersection:
                 result[intersection] = result.get(intersection, 0) + product
-                details += f"{' ∩ '.join(combination)} = {intersection}, mass = {product:.4f}\n"
+                details += f"   - Combination: {combination}\n"
+                details += f"     Intersection: {intersection}\n"
+                details += f"     Mass product: {product:.4f}\n"
+                details += f"     Added to {intersection}\n\n"
             else:
-                details += f"{' ∩ '.join(combination)} = ∅, redistributing mass:\n"
                 total = sum(m[f] for m, f in zip(mass_functions, combination))
                 for m, f in zip(mass_functions, combination):
                     proportional_mass = product * m[f] / total
                     result[f] = result.get(f, 0) + proportional_mass
-                    details += f"  m({f}) += {proportional_mass:.4f}\n"
+                    details += f"   - Combination: {combination}\n"
+                    details += f"     Intersection: ∅ (Conflict)\n"
+                    details += f"     Proportional mass for {f}: {proportional_mass:.4f}\n"
+                    details += f"     Added to {f}\n\n"
         
-        details += "\nFinal mass assignments:\n"
+        details += "8. Final mass assignments:\n\n"
         for A in result:
-            details += f"m({A}) = {result[A]:.4f}\n"
+            details += f"   - {A}: {result[A]:.4f}\n"
         
         return details
 
@@ -325,34 +359,50 @@ class BeliefFunctionGUI:
         self.frame = ttk.Frame(self.master, padding="10")
         self.frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        ttk.Button(self.frame, text="Load Mass Function", command=self.load_mass_function).grid(column=0, row=0, pady=5)
+        # Load Options
+        load_options_frame = ttk.LabelFrame(self.frame, text="Load Option")
+        load_options_frame.grid(column=0, row=0, pady=5, sticky=tk.W)
         
+        self.load_option_var = tk.StringVar(value="replace")
+        ttk.Radiobutton(load_options_frame, text="Replace", variable=self.load_option_var, value="replace").pack(side=tk.LEFT)
+        ttk.Radiobutton(load_options_frame, text="Append", variable=self.load_option_var, value="append").pack(side=tk.LEFT)
+        
+        ttk.Button(self.frame, text="Load Mass Function", command=self.load_mass_function).grid(column=0, row=1, pady=5, sticky=tk.W)
+        
+        # Rule Selection
         self.rule_var = tk.StringVar(value="Dempster")
-        ttk.Label(self.frame, text="Select Rule:").grid(column=0, row=1, pady=5)
-        for i, rule in enumerate(self.tool.rules):
-            ttk.Radiobutton(self.frame, text=rule, variable=self.rule_var, value=rule).grid(column=0, row=i+2, sticky=tk.W)
+        ttk.Label(self.frame, text="Select Rule:").grid(column=0, row=2, pady=5, sticky=tk.W)
+        rules_row = 3
+        for rule in self.tool.rules:
+            ttk.Radiobutton(self.frame, text=rule, variable=self.rule_var, value=rule).grid(column=0, row=rules_row, sticky=tk.W)
+            rules_row += 1
         
-        ttk.Button(self.frame, text="Analyze", command=self.analyze).grid(column=0, row=7, pady=5)
-        ttk.Button(self.frame, text="Conditioning", command=self.perform_conditioning).grid(column=0, row=8, pady=5)
-        ttk.Button(self.frame, text="Marginalization", command=self.perform_marginalization).grid(column=0, row=9, pady=5)
-        ttk.Button(self.frame, text="Calculate Plausibility", command=self.calculate_plausibility).grid(column=0, row=10, pady=5)
+        # Action Buttons
+        ttk.Button(self.frame, text="Analyze", command=self.analyze).grid(column=0, row=rules_row, pady=5, sticky=tk.W)
+        ttk.Button(self.frame, text="Conditioning", command=self.perform_conditioning).grid(column=0, row=rules_row+1, pady=5, sticky=tk.W)
+        ttk.Button(self.frame, text="Marginalization", command=self.perform_marginalization).grid(column=0, row=rules_row+2, pady=5, sticky=tk.W)
+        ttk.Button(self.frame, text="Calculate Plausibility", command=self.calculate_plausibility).grid(column=0, row=rules_row+3, pady=5, sticky=tk.W)
         # ttk.Button(self.frame, text="Calculate Belief",command=self.calculate_belief)
         
+        # Result and Calculation Text Areas
         self.result_text = tk.Text(self.frame, height=10, width=50)
-        self.result_text.grid(column=1, row=0, rowspan=6, padx=10)
+        self.result_text.grid(column=1, row=0, rowspan=4, padx=10, sticky=tk.N)
         
         self.calculation_text = tk.Text(self.frame, height=20, width=50)
-        self.calculation_text.grid(column=1, row=6, rowspan=5, padx=10, pady=10)
+        calculation_scrollbar = ttk.Scrollbar(self.frame, command=self.calculation_text.yview)
+        calculation_scrollbar.grid(column=2, row=4, rowspan=5, sticky=(tk.N, tk.S))
+        self.calculation_text.configure(yscrollcommand=calculation_scrollbar.set)
+        self.calculation_text.grid(column=1, row=4, rowspan=5, padx=10, pady=10, sticky=tk.N)
         
         self.canvas_frame = ttk.Frame(self.master)
         self.canvas_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Data type selection
+        # Data Type Selection
         self.data_type_var = tk.StringVar(value="numeric")
-        ttk.Label(self.frame, text="Data Type:").grid(column=0, row=11, pady=5)
-        ttk.Radiobutton(self.frame, text="Numeric", variable=self.data_type_var, value="numeric").grid(column=0, row=12, sticky=tk.W)
-        ttk.Radiobutton(self.frame, text="Linguistic", variable=self.data_type_var, value="linguistic").grid(column=0, row=13, sticky=tk.W)
-        ttk.Radiobutton(self.frame, text="Interval", variable=self.data_type_var, value="interval").grid(column=0, row=14, sticky=tk.W)
+        ttk.Label(self.frame, text="Data Type:").grid(column=0, row=rules_row+4, pady=5, sticky=tk.W)
+        ttk.Radiobutton(self.frame, text="Numeric", variable=self.data_type_var, value="numeric").grid(column=0, row=rules_row+5, sticky=tk.W)
+        ttk.Radiobutton(self.frame, text="Linguistic", variable=self.data_type_var, value="linguistic").grid(column=0, row=rules_row+6, sticky=tk.W)
+        ttk.Radiobutton(self.frame, text="Interval", variable=self.data_type_var, value="interval").grid(column=0, row=rules_row+7, sticky=tk.W)
     
     def load_mass_function(self):
         filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx"), ("JSON files", "*.json")])
@@ -366,6 +416,10 @@ class BeliefFunctionGUI:
                     new_mass_functions = self.tool.load_data_from_json(filename)
                 else:
                     raise ValueError("Unsupported file format")
+                
+                if self.load_option_var.get() == "replace":
+                    self.mass_functions = []
+                    self.data_types = []
                 
                 for name, mass_function in new_mass_functions.items():
                     self.mass_functions.append(mass_function)

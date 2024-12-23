@@ -54,29 +54,32 @@ Example
 ```
 
 # Conditioning
+```py
 >>>
 >>> conditioned = tool.conditioning(m1, 'A')
 >>> print(conditioned)
 {'A': 1.0}
-
+```
 # Marginalization
-
+```py
 >>> marginalized = tool.marginalization(m1, {'A'})
 >>> print(marginalized)
 {'A': 0.7, '': 0.3}
-
+```
 # Continuous belief function
+```py
 >>>
 >>> belief = tool.continuous_belief_function(1.0, 0, 1)
 >>> print(belief)
 0.8413447460685429
-
+```
 # Sensitivity analysis
+```py
 >>>
 >>> sensitivity = tool.sensitivity_analysis('Dempster', m1, m2)
 >>> print(sensitivity)
 {'A': [...], 'C': [...], 'AC': [...]}
-
+```
 For more information on belief functions and their applications, refer to:
 
 - Shafer, G. (1976). A Mathematical Theory of Evidence. Princeton University Press.
